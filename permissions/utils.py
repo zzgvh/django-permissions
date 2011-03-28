@@ -362,7 +362,8 @@ def has_permission(obj, user, codename, roles=None):
         If given these roles will be assigned to the user temporarily before
         the permissions are checked.
     """
-    cache_key = "%s-%s-%s" % (obj.content_type, obj.id, codename)
+    ct = ContentType.objects.get_for_model(obj)
+    cache_key = "%s-%s-%s" % (ct, obj.id, codename)
     result = _get_cached_permission(user, cache_key)
     if result is not None:
         return result
@@ -375,8 +376,6 @@ def has_permission(obj, user, codename, roles=None):
 
     if not user.is_anonymous():
         roles.extend(get_roles(user, obj))
-
-    ct = ContentType.objects.get_for_model(obj)
 
     result = False
     while obj is not None:

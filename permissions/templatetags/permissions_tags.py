@@ -35,7 +35,7 @@ class PermissionComparisonNode(template.Node):
     def render(self, context):
         obj = context.get("obj")
         request = context.get("request")
-        if permissions.utils.has_permission(self.permission, request.user, obj):
+        if obj and permissions.utils.has_permission(obj, request.user, self.permission):
             return self.nodelist_true.render(context)
         else:
             return self.nodelist_false
