@@ -203,16 +203,17 @@ def get_roles(user, obj=None):
     roles = []
     groups = user.groups.all()
     groups_ids_str = ", ".join([str(g.id) for g in groups])
+    groups_ids_str = groups_ids_str  or "''"
 
     # Gobal roles for user and the user's groups
     cursor = connection.cursor()
     cursor.execute("""SELECT role_id
                       FROM permissions_principalrolerelation
                       WHERE (user_id=%s OR group_id IN (%s))
-                      AND content_id is Null""" % (user.id, groups_ids_str))
+                      AND content_id is NULL""" % (user.id, groups_ids_str))
 
     for row in cursor.fetchall():
-        roles.append(row[0])
+        roles.append(get_role(row[0]))
 
     # Local roles for user and the user's groups and all ancestors of the
     # passed object.
@@ -225,7 +226,7 @@ def get_roles(user, obj=None):
                           AND content_type_id='%s'""" % (user.id, groups_ids_str, obj.id, ctype.id))
 
         for row in cursor.fetchall():
-            roles.append(row[0])
+            roles.append(get_role(row[0]))
 
         try:
             obj = obj.get_parent_for_permissions()
